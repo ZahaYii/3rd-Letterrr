@@ -24,7 +24,7 @@
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  html, body { height: 100%; width: 100%; overflow: hidden; }
+  html, body { height: 100%; width: 100%; overflow: hidden; touch-action: manipulation; }
   body {
     font-family: var(--font-body);
     color: var(--tx);
@@ -32,8 +32,9 @@
     -webkit-font-smoothing: antialiased;
     transition: color .8s ease;
   }
-  button { font-family: inherit; cursor: pointer; touch-action: manipulation; }
+  button { font-family: inherit; cursor: pointer; touch-action: manipulation; user-select: none; }
 
+  /* Background canvas layering */
   #bg {
     position: fixed; inset: 0; width: 100%; height: 100%;
     z-index: 0; pointer-events: none; transition: opacity .45s ease;
@@ -47,9 +48,10 @@
     opacity: .5; mix-blend-mode: soft-light;
   }
 
+  /* Theme navigation */
   #themes {
     position: fixed; top: 14px; left: 50%; transform: translateX(-50%);
-    z-index: 20; display: flex; gap: 4px; padding: 5px;
+    z-index: 40; display: flex; gap: 4px; padding: 5px;
     background: var(--glass); border: 1px solid var(--glass-b);
     border-radius: 60px; box-shadow: 0 8px 28px rgba(0,0,0,.18);
     backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
@@ -75,12 +77,13 @@
     .tbtn[aria-pressed="true"] span:last-child { display: inline; padding-right: 8px; }
   }
 
+  /* Screens */
   .screen {
     position: fixed; inset: 0; z-index: 10;
     display: flex; align-items: center; justify-content: center;
     padding: 24px;
     opacity: 0; visibility: hidden; transform: scale(.98);
-    transition: opacity .6s ease, transform .6s ease, visibility .6s;
+    transition: opacity .4s ease, transform .4s ease, visibility .4s;
     pointer-events: none;
   }
   .screen.active { opacity: 1; visibility: visible; transform: none; pointer-events: auto; }
@@ -90,6 +93,7 @@
     padding: 84px 20px 120px;
   }
 
+  /* Home Card */
   .home {
     position: relative; text-align: center; max-width: 580px; width: 100%;
     padding: clamp(34px, 7vw, 60px) clamp(24px, 6vw, 52px);
@@ -123,29 +127,44 @@
     font-family: var(--font-hand); font-size: clamp(1.4rem, 4.8vw, 1.9rem);
     color: var(--soft); margin: 14px 0 34px; transition: color .8s ease;
   }
+
+  /* Main Action Button with Large Touch Target (Hitbox) */
   .btn-main {
-    position: relative; overflow: hidden; min-height: 52px; min-width: 140px;
-    border: 0; color: #fff; font-size: 1.15rem; letter-spacing: .04em;
-    padding: 16px 40px; border-radius: 50px;
+    position: relative; overflow: visible;
+    min-height: 60px; min-width: 180px;
+    border: 0; color: #fff; font-size: 1.25rem; letter-spacing: .04em;
+    padding: 16px 44px; border-radius: 50px;
     background: linear-gradient(135deg, var(--acc), var(--acc2));
     box-shadow: 0 10px 30px rgba(0,0,0,.25);
-    transition: transform .3s ease, box-shadow .3s ease;
-    z-index: 20;
+    transition: transform .2s ease, box-shadow .2s ease;
+    z-index: 30;
+  }
+  /* Invisible enlarged touch area around the button */
+  .btn-main::before {
+    content: "";
+    position: absolute;
+    top: -24px; bottom: -24px;
+    left: -30px; right: -30px;
+    z-index: 31;
+    background: transparent;
   }
   .btn-main::after {
     content: ""; position: absolute; top: 0; left: -80%; width: 50%; height: 100%;
     background: linear-gradient(100deg, transparent, rgba(255,255,255,.55), transparent);
     transform: skewX(-20deg); animation: sweep 4.5s ease-in-out 1.5s infinite;
+    border-radius: 50px; pointer-events: none;
   }
   @keyframes sweep { 0%, 55% { left: -80%; } 100% { left: 160%; } }
+  .btn-main:active { transform: scale(0.96); }
 
-  .screen.active .home > * { animation: rise 1.1s cubic-bezier(.2,.7,.2,1) both; }
-  .screen.active .home .mark { animation-delay: .15s; }
-  .screen.active .home h1 { animation-delay: .35s; }
-  .screen.active .home .subtitle { animation-delay: .65s; }
-  .screen.active .home .btn-main { animation-delay: .95s; }
-  @keyframes rise { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+  .screen.active .home > * { animation: rise .8s cubic-bezier(.2,.7,.2,1) both; }
+  .screen.active .home .mark { animation-delay: .05s; }
+  .screen.active .home h1 { animation-delay: .15s; }
+  .screen.active .home .subtitle { animation-delay: .25s; }
+  .screen.active .home .btn-main { animation-delay: .35s; }
+  @keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
 
+  /* Letter Paper */
   .paper {
     position: relative; width: 100%; max-width: 700px; margin: 0 auto;
     padding: clamp(34px, 7vw, 68px) clamp(24px, 7vw, 64px);
@@ -184,7 +203,7 @@
 
   .letter-body { font-size: clamp(1.2rem, 3.5vw, 1.4rem); line-height: 1.9; color: var(--tx); }
   .letter-body p { margin-bottom: 1.2em; }
-  .screen.active .letter-body > * { animation: rise 1s ease both; animation-delay: calc(.5s + var(--i, 0) * .18s); }
+  .screen.active .letter-body > * { animation: rise .8s ease both; animation-delay: calc(.2s + var(--i, 0) * .12s); }
 
   .placeholder {
     border: 1.5px dashed var(--acc); background: rgba(255,255,255,.12);
@@ -198,15 +217,20 @@
   .signature small { display: block; font-size: 1.2rem; color: var(--soft); }
 
   .btn-back {
-    display: block; margin: 36px auto 0; padding: 12px 32px; border-radius: 40px;
+    position: relative;
+    display: block; margin: 36px auto 0; padding: 14px 36px; border-radius: 40px;
     background: var(--glass); border: 1px solid var(--glass-b); color: var(--tx);
-    font-size: 1.05rem; min-height: 48px; min-width: 140px;
+    font-size: 1.05rem; min-height: 52px; min-width: 160px;
     backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-    transition: transform .3s ease, background .8s ease;
+    transition: transform .2s ease, background .8s ease;
+  }
+  .btn-back::before {
+    content: ""; position: absolute; top: -16px; bottom: -16px; left: -20px; right: -20px;
   }
 
+  /* Music Player Component */
   #music-wrap {
-    position: fixed; right: 16px; bottom: 16px; z-index: 30;
+    position: fixed; right: 16px; bottom: 16px; z-index: 50;
     display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
     max-width: calc(100vw - 32px);
   }
@@ -221,7 +245,7 @@
     padding: 7px 14px 7px 8px; border-radius: 50px; max-width: 100%;
   }
   #play-btn {
-    width: 44px; height: 44px; flex-shrink: 0; border-radius: 50%; border: 0;
+    width: 46px; height: 46px; flex-shrink: 0; border-radius: 50%; border: 0;
     color: #fff; font-size: 1rem; display: flex; align-items: center; justify-content: center;
     background: linear-gradient(135deg, var(--acc), var(--acc2));
   }
@@ -290,6 +314,7 @@
 
 <nav id="themes" aria-label="Choose a theme"></nav>
 
+<!-- HOMEPAGE -->
 <main id="home-screen" class="screen active">
   <div class="home">
     <div class="mark" aria-hidden="true">✦ ❀ ✦</div>
@@ -299,6 +324,7 @@
   </div>
 </main>
 
+<!-- LETTER PAGE -->
 <section id="letter-screen" class="screen" aria-label="Letter">
   <article class="paper">
     <h2>A Letter for You</h2>
@@ -321,6 +347,7 @@
   <button class="btn-back" id="back-btn" type="button">← Back to Home</button>
 </section>
 
+<!-- MUSIC PLAYER -->
 <div id="music-wrap">
   <div id="playlist" class="hidden" role="region" aria-label="Playlist">
     <div class="pl-head">Our playlist</div>
@@ -344,6 +371,7 @@
 </div>
 
 <script>
+  /* THEMES */
   const THEMES = {
     day: {
       label: "Day", dark: false,
@@ -392,6 +420,7 @@
     }
   };
 
+  /* BACKGROUND CANVAS RENDERER */
   (function () {
     const cv = document.getElementById("bg"), ctx = cv.getContext("2d");
     const root = document.documentElement, nav = document.getElementById("themes");
@@ -563,6 +592,7 @@
     requestAnimationFrame(frame);
   })();
 
+  /* MUSIC PLAYER LOGIC (Subfolder support) */
   const SONGS = [
     { title: "13",   artist: "LANY", src: "songs/song1.mp3" },
     { title: "Beautiful",   artist: "Bazzi", src: "songs/song2.mp3" },
@@ -604,12 +634,17 @@
     if (!audio.src) {
       load(cur, false);
     }
-    const p = audio.play();
-    if (p !== undefined) {
-      p.then(() => setPlayingUI(true)).catch(() => {
-        statusEl.textContent = "tap ▶ to play";
-        setPlayingUI(false);
-      });
+    try {
+      const p = audio.play();
+      if (p !== undefined) {
+        p.then(() => setPlayingUI(true)).catch(() => {
+          statusEl.textContent = "tap ▶ to play";
+          setPlayingUI(false);
+        });
+      }
+    } catch (err) {
+      statusEl.textContent = "tap ▶ to play";
+      setPlayingUI(false);
     }
   }
 
@@ -654,6 +689,7 @@
 
   load(0, false);
 
+  /* SCREEN NAVIGATION & MOBILE EVENT BINDINGS */
   const homeScreen   = document.getElementById("home-screen");
   const letterScreen = document.getElementById("letter-screen");
   const openBtn      = document.getElementById("open-btn");
@@ -661,16 +697,22 @@
 
   document.querySelectorAll(".letter-body > *").forEach((el, i) => el.style.setProperty("--i", i));
 
+  let transitioned = false;
+
   function showLetter(e) {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
+    if (transitioned) return;
+    transitioned = true;
+    setTimeout(() => { transitioned = false; }, 400);
+
     homeScreen.classList.remove("active");
     letterScreen.classList.add("active");
     letterScreen.scrollTop = 0;
     
-    // Safely attempt play after page switch
+    // Non-blocking play attempt
     tryPlay();
   }
 
@@ -683,11 +725,12 @@
     homeScreen.classList.add("active");
   }
 
-  openBtn.addEventListener("click", showLetter);
+  // Fast direct touch & click triggers
   openBtn.addEventListener("touchstart", showLetter, { passive: false });
+  openBtn.addEventListener("click", showLetter);
 
-  backBtn.addEventListener("click", showHome);
   backBtn.addEventListener("touchstart", showHome, { passive: false });
+  backBtn.addEventListener("click", showHome);
 </script>
 </body>
 </html>
